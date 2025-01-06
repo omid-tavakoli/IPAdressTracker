@@ -20,12 +20,18 @@ export default function Map({ latitude, longitude }: MapProps) {
                 zoom: 12,
             });
 
-            new maplibregl.Marker().setLngLat([longitude, latitude]).addTo(map);
+            const markerElement = document.createElement('div');
+            markerElement.style.width = '46px';
+            markerElement.style.height = '57px';
+            markerElement.style.backgroundImage = 'url(icon/icon-location.svg)';
+
+            new maplibregl.Marker({ element: markerElement })
+                .setLngLat([longitude, latitude])
+                .addTo(map);
 
             return () => map.remove();
         }
     }, [latitude, longitude]);
 
-
-    return <div ref={mapContainer} style={{ width: '100%', height: '600px' }} />;
+    return <div ref={mapContainer} style={{ width: '100%', height: '580px' }} />;
 }

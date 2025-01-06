@@ -1,7 +1,7 @@
 "use client"
 import "./globals.css";
-import { QueryClient, QueryClientProvider } from "react-query";
-import { useState } from "react";
+import {  QueryClientProvider } from "react-query";
+import { queryClient } from "../provider/QueryClientProvider";
 
 
 export default function RootLayout({
@@ -9,7 +9,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [queryClient] = useState(() => new QueryClient());
   return (
     <html lang="en">
       <body>
