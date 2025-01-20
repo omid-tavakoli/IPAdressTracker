@@ -1,6 +1,6 @@
 "use client";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { useQuery } from "react-query";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import {
     Box,
@@ -11,7 +11,7 @@ import {
     TextField,
     IconButton,
 } from "@mui/material";
-import Image from "next/image"; // برای آیکون سفارشی
+import Image from "next/image"; 
 
 const Map = dynamic(() => import("../components/Map"));
 
@@ -38,14 +38,17 @@ async function fetchIPInfo(query: string): Promise<IPInfo> {
 
 export default function Home() {
     const { register, handleSubmit } = useForm<FormData>();
-    const { data, refetch, isLoading, isError, error } = useQuery<IPInfo, Error>(
-        ["ipInfo", ""],
-        () => fetchIPInfo(""),
-        { enabled: false }
-    );
+    const queryClient = useQueryClient();
+
+    const mutation = useMutation<IPInfo, Error, string>({
+        mutationFn: fetchIPInfo,
+        onSuccess: (data) => {
+            queryClient.setQueryData(["ipInfo", data.ip], data);
+        },
+    });
 
     const onSubmit: SubmitHandler<FormData> = ({ query }) => {
-        refetch({ queryKey: ["ipInfo", query] });
+        mutation.mutate(query);
     };
 
     return (
@@ -119,87 +122,86 @@ export default function Home() {
             </Box>
 
             {/* Info Section */}
-            {data && (
+            {mutation.data && (
                 <Box
-                sx={{
-                  position: "absolute",
-                  left: "50%",
-                  transform: "translateX(-50%)",
-                  bgcolor: "white",
-                  padding: 5,
-                  borderRadius: 2,
-                  boxShadow: "0 10px 20px rgba(0, 0, 0, 0.2)",
-                  maxWidth: "1200px",
-                  width: {xs : "80%", sm:"90%"},
-                  zIndex: 2,
-                  top: "35vh", 
-                }}
-              >
-                <Stack
-                  direction={{ xs: "column", md: "row" }}
-                  divider={
-                    <Box
-                      sx={{
-                        width: "1px",
-                        bgcolor: "gray",
-                        display: { xs: "none", md: "block" }, 
-                      }}
-                    />
-                  }
-                  spacing={{ xs: 2, md: 4 }}
-                  justifyContent="space-around"
-                  alignItems={{ xs: "center", md: "flex-start" }}
+                    sx={{
+                        position: "absolute",
+                        left: "50%",
+                        transform: "translateX(-50%)",
+                        bgcolor: "white",
+                        padding: 5,
+                        borderRadius: 2,
+                        boxShadow: "0 10px 20px rgba(0, 0, 0, 0.2)",
+                        maxWidth: "1200px",
+                        width: { xs: "80%", sm: "90%" },
+                        zIndex: 2,
+                        top: "35vh",
+                    }}
                 >
-                  <Box>
-                    <Typography sx={{ color: "gray", textAlign: { xs: "center", md: "left" } }}>IP ADDRESS</Typography>
-                    <Typography
-                      variant="h6"
-                      fontWeight="bold"
-                      sx={{ textAlign: { xs: "center", md: "left" } }}
+                    <Stack
+                        direction={{ xs: "column", md: "row" }}
+                        divider={
+                            <Box
+                                sx={{
+                                    width: "1px",
+                                    bgcolor: "gray",
+                                    display: { xs: "none", md: "block" },
+                                }}
+                            />
+                        }
+                        spacing={{ xs: 2, md: 4 }}
+                        justifyContent="space-around"
+                        alignItems={{ xs: "center", md: "flex-start" }}
                     >
-                      {data.ip}
-                    </Typography>
-                  </Box>
-                  <Box>
-                    <Typography sx={{ color: "gray", textAlign: { xs: "center", md: "left" } }}>LOCATION</Typography>
-                    <Typography
-                      variant="h6"
-                      fontWeight="bold"
-                      sx={{ textAlign: { xs: "center", md: "left" } }}
-                    >
-                      {data.city}, {data.region}, {data.country}
-                    </Typography>
-                  </Box>
-                  <Box>
-                    <Typography sx={{ color: "gray", textAlign: { xs: "center", md: "left" } }}>TIMEZONE</Typography>
-                    <Typography
-                      variant="h6"
-                      fontWeight="bold"
-                      sx={{ textAlign: { xs: "center", md: "left" } }}
-                    >
-                      {data.timezone}
-                    </Typography>
-                  </Box>
-                  <Box>
-                    <Typography sx={{ color: "gray", textAlign: { xs: "center", md: "left" } }}>ISP</Typography>
-                    <Typography
-                      variant="h6"
-                      fontWeight="bold"
-                      sx={{ textAlign: { xs: "center", md: "left" } }}
-                    >
-                      {data.org}
-                    </Typography>
-                  </Box>
-                </Stack>
-              </Box>
-              
+                        <Box>
+                            <Typography sx={{ color: "gray", textAlign: { xs: "center", md: "left" } }}>IP ADDRESS</Typography>
+                            <Typography
+                                variant="h6"
+                                fontWeight="bold"
+                                sx={{ textAlign: { xs: "center", md: "left" } }}
+                            >
+                                {mutation.data.ip}
+                            </Typography>
+                        </Box>
+                        <Box>
+                            <Typography sx={{ color: "gray", textAlign: { xs: "center", md: "left" } }}>LOCATION</Typography>
+                            <Typography
+                                variant="h6"
+                                fontWeight="bold"
+                                sx={{ textAlign: { xs: "center", md: "left" } }}
+                            >
+                                {mutation.data.city}, {mutation.data.region}, {mutation.data.country}
+                            </Typography>
+                        </Box>
+                        <Box>
+                            <Typography sx={{ color: "gray", textAlign: { xs: "center", md: "left" } }}>TIMEZONE</Typography>
+                            <Typography
+                                variant="h6"
+                                fontWeight="bold"
+                                sx={{ textAlign: { xs: "center", md: "left" } }}
+                            >
+                                {mutation.data.timezone}
+                            </Typography>
+                        </Box>
+                        <Box>
+                            <Typography sx={{ color: "gray", textAlign: { xs: "center", md: "left" } }}>ISP</Typography>
+                            <Typography
+                                variant="h6"
+                                fontWeight="bold"
+                                sx={{ textAlign: { xs: "center", md: "left" } }}
+                            >
+                                {mutation.data.org}
+                            </Typography>
+                        </Box>
+                    </Stack>
+                </Box>
             )}
 
             {/* Map Section */}
-            {isLoading && <CircularProgress sx={{ display: "block", margin: "20px auto" }} />}
-            {isError && <Alert severity="error">Error: {error.message}</Alert>}
-            {data && (
-                    <Map latitude={data.latitude} longitude={data.longitude} />
+            {mutation.isPending && <CircularProgress sx={{ display: "block", margin: "20px auto" }} />}
+            {mutation.isError && <Alert severity="error">Error: {mutation.error.message}</Alert>}
+            {mutation.isSuccess && mutation.data && (
+                <Map latitude={mutation.data.latitude} longitude={mutation.data.longitude} />
             )}
         </>
     );
