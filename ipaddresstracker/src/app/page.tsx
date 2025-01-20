@@ -12,6 +12,7 @@ import {
     IconButton,
 } from "@mui/material";
 import Image from "next/image"; 
+import axios from "axios";
 
 const Map = dynamic(() => import("../components/Map"));
 
@@ -31,9 +32,8 @@ interface IPInfo {
 }
 
 async function fetchIPInfo(query: string): Promise<IPInfo> {
-    const res = await fetch(`https://ipapi.co/${query}/json/`);
-    if (!res.ok) throw new Error("Failed to fetch data");
-    return res.json();
+    const {data} = await axios.get(`https://ipapi.co/${query}/json/`);
+    return data;
 }
 
 export default function Home() {
